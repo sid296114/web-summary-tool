@@ -7,12 +7,13 @@
 ```
 web-summary-tool/
 ├── backend/             # Node.js + Express 后端（本地开发用）
-├── frontend/            # React + Vite 前端（含 Vercel 无服务器函数）
-│   ├── api/
-│   │   └── summarize.js # 云端部署用的后端函数
+├── frontend/            # React + Vite 前端（含 Netlify 无服务器函数）
+│   ├── netlify/
+│   │   └── functions/
+│   │       └── summarize.js  # 云端部署用的后端函数
 │   ├── src/
 │   │   └── App.jsx      # 界面
-│   └── vercel.json      # Vercel 函数配置
+│   └── netlify.toml     # Netlify 构建与函数配置
 └── .gitignore
 ```
 
@@ -44,37 +45,37 @@ OPENAI_API_KEY=sk-你的真实key
 
 不填 Key 时会显示模拟摘要（用于先跑通界面）。
 
-## 部署到 Vercel（推荐，免费、不需要信用卡）
+## 部署到 Netlify（推荐，免费、不需要信用卡、国内可访问）
 
-前端和后端函数都部署在 Vercel，一个平台搞定。
+前端和后端函数都部署在 Netlify，一个平台搞定。
 
 ### 1. 把代码推到 GitHub（已完成）
 
 仓库：https://github.com/sid296114/web-summary-tool
 
-### 2. 在 Vercel 部署
+### 2. 在 Netlify 部署
 
-1. 打开 https://vercel.com ，用 GitHub 账号登录。
-2. 点 **Add New → Project**，导入 `web-summary-tool` 仓库。
-3. 关键配置：
-   - **Framework Preset**：选择 `Vite`
-   - **Root Directory**：点 Edit，选择 `frontend`
-   - **Build Command**：`npm run build`（一般自动识别，不用改）
-   - **Output Directory**：`dist`（一般自动识别）
-4. 添加环境变量：
+1. 打开 https://app.netlify.com ，用 GitHub 账号登录。
+2. 点 **Add new site → Import an existing project**，选择 GitHub，导入 `web-summary-tool` 仓库。
+3. 关键配置（Netlify 一般会自动读取 `netlify.toml`，通常不用改）：
+   - **Base directory**：填 `frontend`
+   - **Build command**：`npm run build`
+   - **Publish directory**：`dist`
+4. 添加环境变量（Site settings → Environment variables）：
    - Key：`OPENAI_API_KEY`，Value：你的真实 OpenAI Key
    - （可选）`OPENAI_MODEL`：默认 `gpt-4o-mini`
-5. 点 **Deploy**，等 1-2 分钟。
-6. 部署完成后，访问 Vercel 给你的网址（形如 `https://xxx.vercel.app`）即可使用。
+5. 点 **Deploy site**，等 1-2 分钟。
+6. 部署完成后，访问 Netlify 给你的网址（形如 `https://xxx.netlify.app`）即可使用。
 
-> 注意：Vercel 免费版（Hobby）单个函数最长运行 60 秒，已通过 `vercel.json` 里的 `maxDuration: 60` 配置好，抓网页 + 生成摘要够用。
+> `netlify.app` 域名在国内通常可以访问。若个别地区访问慢，可考虑绑定自定义域名。
+
+## 部署到 Vercel（备选，国内常被墙）
+
+Vercel 部署方式类似，但 `vercel.app` 域名在国内经常无法访问，不推荐国内使用。
 
 ## 部署到 Render（备选，后端需绑信用卡）
 
 后端 Web Service 需绑定信用卡，前端 Static Site 不需要卡。
-
-- **后端（Web Service）**：Root 选 `backend`，Start 命令 `node server.js`，环境变量 `OPENAI_API_KEY`
-- **前端（Static Site）**：Root 选 `frontend`，Build 命令 `npm install && npm run build`，Publish 目录 `dist`，环境变量 `VITE_API_BASE_URL` 填后端网址
 
 ## 注意事项
 
