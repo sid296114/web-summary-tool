@@ -1,0 +1,13 @@
+# 站点构建配置（会覆盖 Netlify 后台 Build settings 中的值）
+# publish 与 functions 路径相对于 base 目录
+[build]
+  base = "frontend"
+  command = "npm ci && npm run build"
+  publish = "dist"
+  functions = "netlify/functions"
+
+# 把 /api/summarize 映射到 Netlify 函数，前端代码无需改动
+[[redirects]]
+  from = "/api/summarize"
+  to = "/.netlify/functions/summarize"
+  status = 200
