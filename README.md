@@ -1,13 +1,19 @@
 # 网页摘要工具
 
-输入任意网址，AI 自动抓取网页正文并生成中文摘要。
+输入任意网址，AI 自动抓取网页正文并生成中文摘要（中文展示）。
 
 ## 项目结构
 
 ```
 web-summary-tool/
-├── backend/    # Node.js + Express 后端（抓网页 + 调 OpenAI）
-└── frontend/   # React + Vite 前端（界面）
+├── backend/             # Node.js + Express 后端（本地开发用）
+├── frontend/            # React + Vite 前端（含 Vercel 无服务器函数）
+│   ├── api/
+│   │   └── summarize.js # 云端部署用的后端函数
+│   ├── src/
+│   │   └── App.jsx      # 界面
+│   └── vercel.json      # Vercel 函数配置
+└── .gitignore
 ```
 
 ## 本地运行
@@ -38,46 +44,39 @@ OPENAI_API_KEY=sk-你的真实key
 
 不填 Key 时会显示模拟摘要（用于先跑通界面）。
 
-## 部署到云端（Render 免费方案）
+## 部署到 Vercel（推荐，免费、不需要信用卡）
 
-推荐把前后端都部署到 [Render](https://render.com)，一个平台搞定。
+前端和后端函数都部署在 Vercel，一个平台搞定。
 
-### 1. 先把代码推到 GitHub
+### 1. 把代码推到 GitHub（已完成）
 
-```bash
-cd web-summary-tool
-git init
-git add .
-git commit -m "网页摘要工具"
-git remote add origin https://github.com/你的用户名/你的仓库名.git
-git push -u origin main
-```
+仓库：https://github.com/sid296114/web-summary-tool
 
-### 2. 部署后端（Render Web Service）
+### 2. 在 Vercel 部署
 
-1. 打开 Render，点 **New → Web Service**，连接你的 GitHub 仓库。
-2. 配置：
-   - **Root Directory**：`backend`
-   - **Build Command**：`npm install`
-   - **Start Command**：`node server.js`
-3. 添加环境变量：
-   - `OPENAI_API_KEY` = 你的真实 Key
-4. 点 **Create Web Service**，等部署完成，记下给你的网址，例如 `https://xxx.onrender.com`。
+1. 打开 https://vercel.com ，用 GitHub 账号登录。
+2. 点 **Add New → Project**，导入 `web-summary-tool` 仓库。
+3. 关键配置：
+   - **Framework Preset**：选择 `Vite`
+   - **Root Directory**：点 Edit，选择 `frontend`
+   - **Build Command**：`npm run build`（一般自动识别，不用改）
+   - **Output Directory**：`dist`（一般自动识别）
+4. 添加环境变量：
+   - Key：`OPENAI_API_KEY`，Value：你的真实 OpenAI Key
+   - （可选）`OPENAI_MODEL`：默认 `gpt-4o-mini`
+5. 点 **Deploy**，等 1-2 分钟。
+6. 部署完成后，访问 Vercel 给你的网址（形如 `https://xxx.vercel.app`）即可使用。
 
-### 3. 部署前端（Render Static Site）
+> 注意：Vercel 免费版（Hobby）单个函数最长运行 60 秒，已通过 `vercel.json` 里的 `maxDuration: 60` 配置好，抓网页 + 生成摘要够用。
 
-1. Render 里点 **New → Static Site**，连接同一个仓库。
-2. 配置：
-   - **Root Directory**：`frontend`
-   - **Build Command**：`npm install && npm run build`
-   - **Publish Directory**：`dist`
-3. 添加环境变量：
-   - `VITE_API_BASE_URL` = 第 2 步得到的后端网址（例如 `https://xxx.onrender.com`）
-4. 点 **Create Static Site**，等部署完成，访问它给你的网址即可。
+## 部署到 Render（备选，后端需绑信用卡）
 
-> 前端也可以部署到 Vercel / Netlify，配置方式类似：把 `VITE_API_BASE_URL` 设成后端地址即可。
+后端 Web Service 需绑定信用卡，前端 Static Site 不需要卡。
+
+- **后端（Web Service）**：Root 选 `backend`，Start 命令 `node server.js`，环境变量 `OPENAI_API_KEY`
+- **前端（Static Site）**：Root 选 `frontend`，Build 命令 `npm install && npm run build`，Publish 目录 `dist`，环境变量 `VITE_API_BASE_URL` 填后端网址
 
 ## 注意事项
 
 - `.env` 已被 `.gitignore` 忽略，API Key 不会上传到 Git 仓库。
-- 后端 `cors()` 默认允许所有来源，正式上线可改成只允许你的前端域名。
+- 免费部署的服务器首次访问可能稍慢（冷启动），属正常现象。
